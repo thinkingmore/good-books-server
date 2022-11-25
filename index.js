@@ -19,8 +19,32 @@ const run = async()=>{
     try{
         const categoriesCollection = client.db("goodBooks").collection("categories");
         const booksCollection = client.db("goodBooks").collection("books");
+        const usersCollection = client.db("goodBooks").collection("users");
     
+        
         // API path for running CURD operation
+
+
+        // create users upon client request
+        app.get('/users',async(req,res)=>{
+            const query = {};
+            const cursor = usersCollection.find(query);
+            const users = await cursor.toArray();
+            res.send(users);
+        })
+        
+        app.post('/users',async(req,res)=>{
+            const user = req.body;
+            const result = await usersCollection.insertOne(user);
+            res.send(result);
+        })
+        
+        
+        
+        
+        
+        // send categories,books,and books by categories to client
+        
         app.get('/categories',async(req,res)=>{
             const query= {}
             const cursor = categoriesCollection.find(query)
@@ -44,11 +68,11 @@ const run = async()=>{
 
         // code to update particular fields in database
         app.get('/edit', async (req, res) => {
-                const filter = {category_name:	"Non-Fiction" }
+                const filter = { seller_name: "Jerin Ahmed" }
                 const options = { upsert: true }
                 const updatedDoc = {
                     $set: {
-                        category_name: "non-fiction"
+                        seller_status: "verified"
                     }
                 }
                 const result = await booksCollection.updateMany(filter, updatedDoc, options);
