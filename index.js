@@ -80,6 +80,14 @@ const run = async()=>{
             res.send(result);
         })
 
+        // check if a user is a buyer
+        app.get('/users/:email', async (req, res) => {
+            const email = req.params.email;
+            const query = { email }
+            const user = await usersCollection.findOne(query);
+            res.send(user);
+        })
+
         // post booking data of books
         app.post('/orders',async(req,res)=>{
             const order = req.body;
@@ -87,11 +95,25 @@ const run = async()=>{
             res.send(result);
         })
 
+        app.get('/orders/:email', async (req, res) => {
+            const email = req.params.email;
+            const query = { email }
+            const order = await usersCollection.find(query).toArray();
+            res.send(order);
+        })
+
         app.get('/orders',async(req,res)=>{
             const query = {};
             const cursor = ordersCollection.find(query);
             const orders = await cursor.toArray();
             res.send(orders);
+        })
+
+        app.delete('/orders/:id', async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: (ObjectId(id)) }
+            const result = await ordersCollection.deleteOne(filter);
+            res.send(result);
         })
         
         // process user dashboard loading request based on user role
@@ -123,17 +145,17 @@ const run = async()=>{
         })
 
         // code to update particular fields in database
-        app.get('/edit', async (req, res) => {
-                const filter = { seller_name: "Jerin Ahmed" }
-                const options = { upsert: true }
-                const updatedDoc = {
-                    $set: {
-                        seller_status: "verified"
-                    }
-                }
-                const result = await booksCollection.updateMany(filter, updatedDoc, options);
-                res.send(result);
-            })
+        // app.get('/edit', async (req, res) => {
+        //         const filter = {email: "nay@gmail.com"}
+        //         const options = { upsert: true }
+        //         const updatedDoc = {
+        //             $set: {
+        //                 role: "seller"
+        //             }
+        //         }
+        //         const result = await usersCollection.updateMany(filter, updatedDoc, options);
+        //         res.send(result);
+        //     })
 
     }
     
