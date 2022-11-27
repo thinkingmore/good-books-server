@@ -55,6 +55,14 @@ const run = async()=>{
         // Contains Database Collection //
         
         
+        // Verify if user is Admin for admin protected routes
+
+        app.get('/admin/:email', async (req, res) => {
+            const email = req.params.email;
+            const query = { email }
+            const user = await usersCollection.findOne(query);
+            res.send({ isAdmin: user?.role === 'admin' });
+        })
         
         
         // generate jwt token if the user exist in database
@@ -107,7 +115,8 @@ const run = async()=>{
         
         
         
-        // Booking Related Operation for Buyers Starts//
+        // Booking Related and Other Operations for Buyers Starts//
+        
         app.post('/orders',async(req,res)=>{
             const order = req.body;
             const result = await ordersCollection.insertOne(order);
@@ -134,6 +143,19 @@ const run = async()=>{
             const result = await ordersCollection.deleteOne(filter);
             res.send(result);
         })
+
+        app.put('/report/:id',async(req,res)=>{
+            const id = req.params.id;
+            const filter = { _id: ObjectId(id)};
+            const option = { upsert : true };
+            const updatedDoc = {
+                $set: { flag_status: "yes" }
+            }
+            const result = await booksCollection.updateOne(filter, updatedDoc, option);
+            res.send(result);
+        })
+       
+
         
         // Booking Related Operation for Buyers Ends//
         
@@ -168,6 +190,19 @@ const run = async()=>{
             const id = req.params.id;
             const filter = { _id: (ObjectId(id)) }
             const result = await usersCollection.deleteOne(filter);
+            res.send(result);
+        })
+
+        app.get('/report',async(req,res) => {
+            const query = { flag_status : "yes"};
+            const result = await booksCollection.find(query).toArray();
+            res.send(result);
+        })
+
+        app.delete('/report/:id', async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: (ObjectId(id)) }
+            const result = await booksCollection.deleteOne(filter);
             res.send(result);
         })
 
