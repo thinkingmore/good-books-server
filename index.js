@@ -98,7 +98,7 @@ const run = async()=>{
         app.get('/orders/:email', async (req, res) => {
             const email = req.params.email;
             const query = { email }
-            const order = await usersCollection.find(query).toArray();
+            const order = await ordersCollection.find(query).toArray();
             res.send(order);
         })
 
@@ -116,9 +116,37 @@ const run = async()=>{
             res.send(result);
         })
         
-        // process user dashboard loading request based on user role
         
         
+        // process user dashboard loading request based on admin role
+
+        app.get('/allusers/:role',async(req,res)=>{
+            const role = req.params.role;
+            const cursor = usersCollection.find({ role: role });
+            const result = await cursor.toArray();
+            res.send(result);
+        })
+
+        app.put('/allsellers/:id', async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: ObjectId(id) }
+            const options = { upsert: true };
+            const updatedDoc = {
+                $set: {
+                    seller_status: "verified"
+                }
+            }
+            const result = await usersCollection.updateOne(filter, updatedDoc, options);
+            res.send(result);
+        });
+        
+        
+        app.delete('/users/:id', async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: (ObjectId(id)) }
+            const result = await usersCollection.deleteOne(filter);
+            res.send(result);
+        })
         
         
         // send categories,books,and books by categories to client
@@ -144,16 +172,39 @@ const run = async()=>{
             res.send(books);
         })
 
-        // code to update particular fields in database
+        // api for seller to perform CURD operation and display added products
+        
+        app.get('/myproducts/:email', async (req, res) => {
+            const email = req.params.email;
+            const query = { email }
+            const products = await booksCollection.find(query).toArray();
+            res.send(products);
+        })
+       
+        app.delete('/books/:id', async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: (ObjectId(id)) }
+            const result = await booksCollection.deleteOne(filter);
+            res.send(result);
+        })
+      
+
+        app.post('/books',async(req,res)=>{
+            const book = req.body;
+            const result = await booksCollection.insertOne(book);
+            res.send(result);
+        })
+
+        //code to update particular fields in database
         // app.get('/edit', async (req, res) => {
-        //         const filter = {email: "nay@gmail.com"}
+        //         const filter = {seller_status: "nay@gmail.com"}
         //         const options = { upsert: true }
         //         const updatedDoc = {
         //             $set: {
-        //                 role: "seller"
+        //                 seller_status: seller_email
         //             }
         //         }
-        //         const result = await usersCollection.updateMany(filter, updatedDoc, options);
+        //         const result = await usersCollection.updateOne(filter, updatedDoc, options);
         //         res.send(result);
         //     })
 
