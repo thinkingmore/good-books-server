@@ -210,23 +210,37 @@ const run = async()=>{
         // API for All Registered Users Ends //
         
         
-        // Sellers CURD Operatin API Starts //
-        
-        app.get('/myproducts/:email', async (req, res) => {
+        // Sellers CURD Operatin API Starts // 
+
+        app.get('/myproducts/:email',async(req,res)=>{
             const email = req.params.email;
-            const query = { email }
-            const products = await booksCollection.find(query).toArray();
-            res.send(products);
+            const filter = { seller_email: email};
+            const result = await booksCollection.find(filter).toArray();
+            res.send(result);
         })
 
 
-        app.put('/myproducts/:id', async (req, res) => {
+        app.put('/myproducts/advertise/:id', async (req, res) => {
             const id = req.params.id;
             const filter = { _id: (ObjectId(id)) }
             const options = { upsert: true };
             const updatedDoc = {
                 $set: {
                     advertise: "yes"
+                }
+            }
+            const result = await booksCollection.updateOne(filter, updatedDoc, options);
+            res.send(result);
+            
+        })
+
+        app.put('/myproducts/status/:id', async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: (ObjectId(id)) }
+            const options = { upsert: true };
+            const updatedDoc = {
+                $set: {
+                    advertise: "no", available: "no",
                 }
             }
             const result = await booksCollection.updateOne(filter, updatedDoc, options);
