@@ -44,14 +44,19 @@ function verifyJWT(req, res, next) {
 
 const run = async()=>{
     try{
+
+        // Contains Database Collection //
+        
         const categoriesCollection = client.db("goodBooks").collection("categories");
         const booksCollection = client.db("goodBooks").collection("books");
         const usersCollection = client.db("goodBooks").collection("users");
         const ordersCollection = client.db("goodBooks").collection("orders");
-    
+         
+        // Contains Database Collection //
         
-        // API path for running CURD operation
-
+        
+        
+        
         // generate jwt token if the user exist in database
 
         app.get('/jwt', async (req, res) => {
@@ -66,7 +71,10 @@ const run = async()=>{
         });
 
 
-        // create users upon client request
+        
+        
+        // Show All Users and Create New User Upon Cient Request //
+        
         app.get('/users',async(req,res)=>{
             const query = {};
             const cursor = usersCollection.find(query);
@@ -80,7 +88,13 @@ const run = async()=>{
             res.send(result);
         })
 
-        // check if a user is a buyer
+        // Show All Users and Create New User Upon Cient Request //
+
+        
+        
+        
+        // Collect User Related Information for Loading Dashborad Data //
+        
         app.get('/users/:email', async (req, res) => {
             const email = req.params.email;
             const query = { email }
@@ -88,7 +102,12 @@ const run = async()=>{
             res.send(user);
         })
 
-        // post booking data of books
+        // Collect User Related Information for Loading Dashboard Data //
+
+        
+        
+        
+        // Booking Related Operation for Buyers Starts//
         app.post('/orders',async(req,res)=>{
             const order = req.body;
             const result = await ordersCollection.insertOne(order);
@@ -116,9 +135,13 @@ const run = async()=>{
             res.send(result);
         })
         
+        // Booking Related Operation for Buyers Ends//
+        
+       
         
         
-        // process user dashboard loading request based on admin role
+        
+        // Admin Only Operation Starts //
 
         app.get('/allusers/:role',async(req,res)=>{
             const role = req.params.role;
@@ -147,15 +170,26 @@ const run = async()=>{
             const result = await usersCollection.deleteOne(filter);
             res.send(result);
         })
+
+        
+        // Admin Only operation Ends //
+
         
         
-        // send categories,books,and books by categories to client
+        
+        // API for All Registered Users Starts //
         
         app.get('/categories',async(req,res)=>{
             const query= {}
             const cursor = categoriesCollection.find(query)
             const categories = await cursor.toArray();
             res.send(categories);
+        })
+
+        app.get('/avertised', async (req, res) => {
+            const query = { advertise: "yes" };
+            const products = await booksCollection.find(query).toArray();
+            res.send(products);
         })
 
         app.get('/books',async(req,res)=>{
@@ -172,7 +206,11 @@ const run = async()=>{
             res.send(books);
         })
 
-        // api for seller to perform CURD operation and display added products
+        
+        // API for All Registered Users Ends //
+        
+        
+        // Sellers CURD Operatin API Starts //
         
         app.get('/myproducts/:email', async (req, res) => {
             const email = req.params.email;
@@ -180,7 +218,23 @@ const run = async()=>{
             const products = await booksCollection.find(query).toArray();
             res.send(products);
         })
-       
+
+
+        app.put('/myproducts/:id', async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: (ObjectId(id)) }
+            const options = { upsert: true };
+            const updatedDoc = {
+                $set: {
+                    advertise: "yes"
+                }
+            }
+            const result = await booksCollection.updateOne(filter, updatedDoc, options);
+            res.send(result);
+            
+        })
+        
+        
         app.delete('/books/:id', async (req, res) => {
             const id = req.params.id;
             const filter = { _id: (ObjectId(id)) }
@@ -194,6 +248,9 @@ const run = async()=>{
             const result = await booksCollection.insertOne(book);
             res.send(result);
         })
+
+
+        // Sellers CURD Operatin API Ends //
 
         //code to update particular fields in database
         // app.get('/edit', async (req, res) => {
