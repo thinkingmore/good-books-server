@@ -51,7 +51,9 @@ const run = async()=>{
         const booksCollection = client.db("goodBooks").collection("books");
         const usersCollection = client.db("goodBooks").collection("users");
         const ordersCollection = client.db("goodBooks").collection("orders");
-         
+        const flagsCollection = client.db("goodBooks").collection("flagItems");
+        
+        
         // Contains Database Collection //
         
         
@@ -146,10 +148,10 @@ const run = async()=>{
 
         app.put('/report/:id',async(req,res)=>{
             const id = req.params.id;
-            const filter = { _id: ObjectId(id)};
+            const filter = { _id: (ObjectId(id)) };
             const option = { upsert : true };
             const updatedDoc = {
-                $set: { flag_status: "yes" }
+                $inc: { flag_status: +1 }
             }
             const result = await booksCollection.updateOne(filter, updatedDoc, option);
             res.send(result);
@@ -194,7 +196,7 @@ const run = async()=>{
         })
 
         app.get('/report',async(req,res) => {
-            const query = { flag_status : "yes"};
+            const query = { flag_status :{$gt: 0} };
             const result = await booksCollection.find(query).toArray();
             res.send(result);
         })
