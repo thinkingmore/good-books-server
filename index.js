@@ -221,7 +221,7 @@ const run = async()=>{
             res.send(categories);
         })
 
-        app.get('/avertised', async (req, res) => {
+        app.get('/advertised', async (req, res) => {
             const query = { advertise: "yes" };
             const products = await booksCollection.find(query).toArray();
             res.send(products);
